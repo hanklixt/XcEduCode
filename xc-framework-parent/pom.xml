@@ -45,6 +45,7 @@
         <mysql-connector-java.version>5.1.40</mysql-connector-java.version>
         <elasticsearch.version>6.2.1</elasticsearch.version>
         <guava.version>24.0-jre</guava.version>
+        <open-fegin-okhttp.version>10.2.1</open-fegin-okhttp.version>
     </properties>
     <!--test-->
     <dependencyManagement>
@@ -82,10 +83,15 @@
                 <artifactId>okhttp</artifactId>
                 <version>${okhttp.version}</version>
             </dependency>
+            <!--<dependency>-->
+            <!--<groupId>com.netflix.feign</groupId>-->
+            <!--<artifactId>feign-okhttp</artifactId>-->
+            <!--<version>${feign-okhttp.version}</version>-->
+            <!--</dependency>-->
             <dependency>
-                <groupId>com.netflix.feign</groupId>
+                <groupId>io.github.openfeign</groupId>
                 <artifactId>feign-okhttp</artifactId>
-                <version>${feign-okhttp.version}</version>
+                <version>${open-fegin-okhttp.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
