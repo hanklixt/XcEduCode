@@ -1,5 +1,6 @@
 package com.xuecheng.manage_cms.service;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.xuecheng.api.cms.CmsPageControllerApi;
 import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.cms.request.QueryPageRequest;
@@ -9,11 +10,13 @@ import com.xuecheng.framework.model.response.QueryResponseResult;
 import com.xuecheng.framework.model.response.QueryResult;
 import com.xuecheng.manage_cms.dao.CmsPageRepository;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author lxt
@@ -64,11 +67,37 @@ public class CmsService implements CmsPageControllerApi {
         //校验页面是否存在，根据页面名称、站点Id、页面webpath查询
         CmsPage cms = cmsRepository.findByPageNameAndPageWebPathAndSiteId(cmsPage.getPageName(), cmsPage.getPageWebPath(), cmsPage.getSiteId());
         if (Objects.isNull(cms)) {
-            cmsPage.setPageId(null);//添加页面主键由spring data 自动生成
+            cmsPage.setPageId(null);
+            //添加页面主键由spring data 自动生成
             cmsRepository.save(cmsPage);
             //返回结果
             CmsPageResult cmsPageResult = new CmsPageResult(CommonCode.SUCCESS, cmsPage);
             return cmsPageResult;
+        }
+        return new CmsPageResult(CommonCode.FAIL, null);
+    }
+
+    public CmsPage findById(String id) {
+        final Optional<CmsPage> optional = cmsRepository.findById(id);
+        if (optional.isPresent()) {
+            return optional.get();
+        }
+        return null;
+    }
+
+
+    //修改页面
+    public CmsPageResult update(String id, CmsPage cmsPage) {
+        final CmsPage cms = findById(id);
+        if (ObjectUtil.isNotNull(cms)) {
+            BeanUtils.copyProperties(cmsPage, cms);
+            cms.setPageId(id);
+            final CmsPage save = cmsRepository.save(cms);
+            if (ObjectUtil.isNull(save)) {
+                //返回成功
+                CmsPageResult cmsPageResult = new CmsPageResult(CommonCode.SUCCESS, save);
+                return cmsPageResult;
+            }
         }
         return new CmsPageResult(CommonCode.FAIL, null);
     }
