@@ -43,7 +43,7 @@ public class CmsPageController implements CmsPageControllerApi {
         return cmsService.findById(id);
     }
 
-    @GetMapping("/del/{id}")
+    @DeleteMapping("/del/{id}")
     public ResponseResult delete(@PathVariable String id) {
         return cmsService.delete(id);
     }
