@@ -8,6 +8,7 @@ import com.xuecheng.framework.domain.cms.response.CmsPageResult;
 import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
 import com.xuecheng.framework.model.response.QueryResult;
+import com.xuecheng.framework.model.response.ResponseResult;
 import com.xuecheng.manage_cms.dao.CmsPageRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -93,12 +94,23 @@ public class CmsService implements CmsPageControllerApi {
             BeanUtils.copyProperties(cmsPage, cms);
             cms.setPageId(id);
             final CmsPage save = cmsRepository.save(cms);
-            if (ObjectUtil.isNull(save)) {
+            if (ObjectUtil.isNotNull(save)) {
                 //返回成功
                 CmsPageResult cmsPageResult = new CmsPageResult(CommonCode.SUCCESS, save);
                 return cmsPageResult;
             }
         }
         return new CmsPageResult(CommonCode.FAIL, null);
+    }
+
+    /**
+     * 删除页面
+     *
+     * @param id
+     * @return
+     */
+    public ResponseResult delete(String id) {
+        cmsRepository.deleteById(id);
+        return new ResponseResult(CommonCode.SUCCESS);
     }
 }
