@@ -1,6 +1,8 @@
 package com.xuecheng.framework.model.response;
 
+import lombok.Getter;
 import lombok.ToString;
+import org.springframework.web.bind.annotation.GetMapping;
 
 /**
  * @Author: mrt.
@@ -10,6 +12,7 @@ import lombok.ToString;
  */
 
 @ToString
+@Getter
 public enum CommonCode implements ResultCode{
 
     SUCCESS(true,10000,"操作成功！"),
