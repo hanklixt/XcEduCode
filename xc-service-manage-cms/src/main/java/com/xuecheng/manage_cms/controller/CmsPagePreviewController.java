@@ -31,8 +31,9 @@ public class CmsPagePreviewController {
     @GetMapping("/{id}")
     public void preview(@PathVariable String id, HttpServletResponse response) {
         final String html = cmsService.getHtmlByPageId(id);
+        ServletOutputStream outputStream = null;
         try {
-            final ServletOutputStream outputStream = response.getOutputStream();
+            outputStream = response.getOutputStream();
             outputStream.write(html.getBytes("utf-8"));
         } catch (IOException e) {
 
