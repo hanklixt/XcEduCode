@@ -7,13 +7,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
-    public HttpResult exceptionHandle(Exception e){
-         if (e instanceof CommonException){
-           HttpResultUtil.error(CommonCode.FAIL.getCode(),e.getMessage());
-         }
-         //todo 补充细分异常
-        
-        return new HttpResult(CommonCode.FAIL.getCode(),"系统错误");
+    public HttpResult exceptionHandle(Exception e) {
+        if (e instanceof CommonException) {
+            CommonException exception = (CommonException) e;
+            HttpResultUtil.error(exception.getCode(), exception.getMessage());
+        }
+        //todo 补充细分异常
+
+        return new HttpResult(CommonCode.FAIL.getCode(), "系统错误");
 
     }
 

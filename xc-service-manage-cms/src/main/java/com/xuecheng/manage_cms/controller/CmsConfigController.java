@@ -30,4 +30,5 @@ public class CmsConfigController implements CmsConfigControllerApi {
     public CmsConfig getModelById(@PathVariable String id) {
         return cmsConfigService.getModelById(id);
     }
+
 }

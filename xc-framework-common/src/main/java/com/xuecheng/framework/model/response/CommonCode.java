@@ -2,7 +2,6 @@ package com.xuecheng.framework.model.response;
 
 import lombok.Getter;
 import lombok.ToString;
-import org.springframework.web.bind.annotation.GetMapping;
 
 /**
  * @Author: mrt.
@@ -13,21 +12,27 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @ToString
 @Getter
-public enum CommonCode implements ResultCode{
+public enum CommonCode implements ResultCode {
 
-    SUCCESS(true,10000,"操作成功！"),
-    FAIL(false,11111,"操作失败！"),
-    UNAUTHENTICATED(false,10001,"此操作需要登陆系统！"),
-    UNAUTHORISE(false,10002,"权限不足，无权操作！"),
-    SERVER_ERROR(false,99999,"抱歉，系统繁忙，请稍后重试！");
-//    private static ImmutableMap<Integer, CommonCode> codes ;
+    SUCCESS(true, 10000, "操作成功！"),
+    FAIL(false, 11111, "操作失败！"),
+    UNAUTHENTICATED(false, 10001, "此操作需要登陆系统！"),
+    UNAUTHORISE(false, 10002, "权限不足，无权操作！"),
+    NO_PAGE(false, 10003, "暂无页面信息"),
+    NO_DATA(false, 10004, "暂未配置dataUrl"),
+    NO_TEMPLATE(false, 10004, "暂未配置模板"),
+    NO_DATAINFO(false, 10005, "暂未配置数据信息"),
+    FAIL_GENERATE(false, 10005, "生成模板失败"),
+    SERVER_ERROR(false, 99999, "抱歉，系统繁忙，请稍后重试！");
+    //    private static ImmutableMap<Integer, CommonCode> codes ;
     //操作是否成功
     boolean success;
     //操作代码
     int code;
     //提示信息
     String message;
-    private CommonCode(boolean success,int code, String message){
+
+    private CommonCode(boolean success, int code, String message) {
         this.success = success;
         this.code = code;
         this.message = message;
@@ -37,6 +42,7 @@ public enum CommonCode implements ResultCode{
     public boolean success() {
         return success;
     }
+
     @Override
     public int code() {
         return code;
