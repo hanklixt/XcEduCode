@@ -1,5 +1,5 @@
 import com.xuecheng.TestRabbitApplication;
-import com.xuecheng.config.RabbitConfig;
+import com.xuecheng.client.config.RabbitConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
