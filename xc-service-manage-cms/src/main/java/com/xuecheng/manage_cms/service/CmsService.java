@@ -1,6 +1,9 @@
 package com.xuecheng.manage_cms.service;
 
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSFile;
@@ -14,6 +17,7 @@ import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.QueryResponseResult;
 import com.xuecheng.framework.model.response.QueryResult;
 import com.xuecheng.framework.model.response.ResponseResult;
+import com.xuecheng.manage_cms.config.RabbitmqConfig;
 import com.xuecheng.manage_cms.dao.CmsPageRepository;
 import com.xuecheng.manage_cms.dao.CmsTemplateRepository;
 import freemarker.cache.StringTemplateLoader;
@@ -23,6 +27,8 @@ import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -38,6 +44,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -52,8 +59,6 @@ public class CmsService implements CmsPageControllerApi {
     @Autowired
     private CmsPageRepository cmsRepository;
     @Autowired
-    private CmsConfigService cmsConfigService;
-    @Autowired
     private CmsTemplateRepository templateRepository;
     @Autowired
     private GridFSBucket gridFSBucket;
@@ -61,9 +66,11 @@ public class CmsService implements CmsPageControllerApi {
     private GridFsTemplate gridFsTemplate;
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
-     * 通用分页
+     * 通用分页(模糊查询)
      *
      * @param page
      * @param size
@@ -92,11 +99,64 @@ public class CmsService implements CmsPageControllerApi {
         QueryResult<CmsPage> cmsPageQueryResult = new QueryResult<CmsPage>();
         cmsPageQueryResult.setList(all.getContent());
         cmsPageQueryResult.setTotal(all.getTotalElements());
-//返回结果
+        //返回结果
         return new QueryResponseResult(CommonCode.SUCCESS, cmsPageQueryResult);
     }
 
-    //添加页面
+    /**
+     * 发布页面
+     *
+     * @return
+     */
+    public CmsPage postPage(String pageId) {
+        //根据pageId生成页面，返回html内容
+        final String html = this.getHtmlByPageId(pageId);
+        if (StrUtil.isBlank(html)) {
+            throw new CommonException(CommonCode.NO_DATAINFO);
+        }
+        //使用工具类将字符串转为io流
+        CmsPage cmsPage = this.findById(pageId);
+        cmsPage = this.saveHtml(html, cmsPage);
+        sendPostPage(pageId, cmsPage.getSiteId());
+        return cmsPage;
+    }
+
+
+    /**
+     * 发送消息给mq
+     *
+     * @param pageId
+     */
+    private void sendPostPage(String pageId, String siteId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("pageId", pageId);
+        final String message = JSON.toJSONString(params);
+        rabbitTemplate.convertAndSend(RabbitmqConfig.EX_ROUTING_CMS_POSTPAGE, siteId, message);
+    }
+
+    /**
+     * 保存html文件到gridFS
+     */
+    private CmsPage saveHtml(String html, CmsPage cmsPage) {
+        //如果html文件不为空，则先根据文件id删除文件
+        if (StrUtil.isNotBlank(cmsPage.getHtmlFileId())) {
+            gridFsTemplate.delete(Query.query(Criteria.where("_id").is(cmsPage.getHtmlFileId())));
+        }
+        final InputStream inputStream = IoUtil.toStream(html, "utf-8");
+        final ObjectId objectId = gridFsTemplate.store(inputStream, cmsPage.getPageName(), "");
+        final String fileId = objectId.toHexString();
+        cmsPage.setHtmlFileId(fileId);
+        cmsRepository.save(cmsPage);
+        return cmsPage;
+    }
+
+
+    /**
+     * 添加页面
+     *
+     * @param cmsPage
+     * @return
+     */
     public CmsPageResult add(CmsPage cmsPage) {
         //校验页面是否存在，根据页面名称、站点Id、页面webpath查询
         CmsPage cms = cmsRepository.findByPageNameAndPageWebPathAndSiteId(cmsPage.getPageName(), cmsPage.getPageWebPath(), cmsPage.getSiteId());
@@ -105,18 +165,14 @@ public class CmsService implements CmsPageControllerApi {
             //添加页面主键由spring data 自动生成
             cmsRepository.save(cmsPage);
             //返回结果
-            CmsPageResult cmsPageResult = new CmsPageResult(CommonCode.SUCCESS, cmsPage);
-            return cmsPageResult;
+            return new CmsPageResult(CommonCode.SUCCESS, cmsPage);
         }
         return new CmsPageResult(CommonCode.FAIL, null);
     }
 
     public CmsPage findById(String id) {
         final Optional<CmsPage> optional = cmsRepository.findById(id);
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return null;
+        return optional.orElse(null);
     }
 
 
@@ -129,8 +185,7 @@ public class CmsService implements CmsPageControllerApi {
             final CmsPage save = cmsRepository.save(cms);
             if (ObjectUtil.isNotNull(save)) {
                 //返回成功
-                CmsPageResult cmsPageResult = new CmsPageResult(CommonCode.SUCCESS, save);
-                return cmsPageResult;
+                return new CmsPageResult(CommonCode.SUCCESS, save);
             }
         }
         return new CmsPageResult(CommonCode.FAIL, null);
@@ -176,13 +231,14 @@ public class CmsService implements CmsPageControllerApi {
             final Configuration configuration = new Configuration(Configuration.getVersion());
             //模板加载器
             final StringTemplateLoader stringTemplateLoader = new StringTemplateLoader();
+            //配置模板
             stringTemplateLoader.putTemplate("template", template);
             //配置模板加载器
             configuration.setTemplateLoader(stringTemplateLoader);
             final Template template1 = configuration.getTemplate("template");
             try {
-                final String html = FreeMarkerTemplateUtils.processTemplateIntoString(template1, model);
-                return html;
+                //生成html字符串
+                return FreeMarkerTemplateUtils.processTemplateIntoString(template1, model);
             } catch (TemplateException e) {
                 log.error("生成模板失败");
                 return null;
