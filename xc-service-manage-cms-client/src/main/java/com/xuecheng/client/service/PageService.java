@@ -123,6 +123,6 @@ public class PageService {
         } catch (IOException e) {
             log.error("getHtmlInputStream is exceptioned:{}", e.getMessage());
         }
-        return null;
+        return inputStream;
     }
 }

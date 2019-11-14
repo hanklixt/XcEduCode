@@ -2,10 +2,10 @@ server:
   port: 31000
 spring:
   application:
-    name: xc‐service‐manage‐cms‐client
+    name: xc-service-manage-cms-client
   data:
     mongodb:
-      uri: mongodb://root:123@localhost:27017
+      uri: mongodb://localhost:27017
       database: xc_cms
   rabbitmq:
     host: 127.0.0.1
