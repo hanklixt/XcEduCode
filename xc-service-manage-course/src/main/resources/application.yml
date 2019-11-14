@@ -1,0 +1,21 @@
+server:
+  port: 31200
+
+spring:
+  application:
+    name: xc-service-manage-course
+  datasource:
+    url: jdbc:mysql://192.168.5.169:3306/xc_course?serverTimezone=GMT%2B8&useUnicode=true&useSSL=false&characterEncoding=utf8
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      idle-timeout: 30000
+      minimum-idle: 5
+      maximum-pool-size: 10
+      auto-commit: true
+      max-lifetime: 18000000
+      connection-timeout: 30000
+      pool-name: DatebookHikariCP
+#      connection-test-query: SELECT  1
