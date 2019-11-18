@@ -33,7 +33,7 @@ public class TeachplanController {
         });
     }
 
-    @PostMapping("/teachPlan/add")
+    @PostMapping("/add")
     public Mono<HttpResult> addTeachPlan(@RequestBody Teachplan teachplan) {
         teachplanService.addTeachPlan(teachplan);
         return Mono.create(x -> {

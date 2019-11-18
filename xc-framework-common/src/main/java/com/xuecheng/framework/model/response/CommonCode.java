@@ -23,6 +23,7 @@ public enum CommonCode implements ResultCode {
     NO_TEMPLATE(false, 10004, "暂未配置模板"),
     NO_DATAINFO(false, 10005, "暂未配置数据信息"),
     FAIL_GENERATE(false, 10005, "生成模板失败"),
+    BAD_REQUEST(false, 10006, "参数非法，请检查"),
     SERVER_ERROR(false, 99999, "抱歉，系统繁忙，请稍后重试！");
     //    private static ImmutableMap<Integer, CommonCode> codes ;
     //操作是否成功
