@@ -1,15 +1,13 @@
 package com.xuecheng.course.manage.controller;
 
 
+import com.xuecheng.course.manage.entity.Teachplan;
 import com.xuecheng.course.manage.service.ITeachplanService;
 import com.xuecheng.framework.domain.course.ext.TeachplanNode;
 import com.xuecheng.framework.exception.HttpResult;
 import com.xuecheng.framework.model.response.CommonCode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 /**
@@ -35,4 +33,11 @@ public class TeachplanController {
         });
     }
 
+    @PostMapping("/teachPlan/add")
+    public Mono<HttpResult> addTeachPlan(@RequestBody Teachplan teachplan) {
+        teachplanService.addTeachPlan(teachplan);
+        return Mono.create(x -> {
+            x.success(new HttpResult(CommonCode.SUCCESS));
+        });
+    }
 }

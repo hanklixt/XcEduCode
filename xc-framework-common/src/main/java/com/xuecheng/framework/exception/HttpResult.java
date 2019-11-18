@@ -25,4 +25,9 @@ public class HttpResult {
         this.data = data;
     }
 
+    public HttpResult(CommonCode commonCode) {
+        this.code = commonCode.getCode();
+        this.message = commonCode.getMessage();
+    }
+
 }
