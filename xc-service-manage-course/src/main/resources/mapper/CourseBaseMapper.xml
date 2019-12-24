@@ -2,4 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.xuecheng.course.manage.mapper.CourseBaseMapper">
 
+    <select id="findCourseList" resultType="com.xuecheng.framework.domain.course.ext.CourseInfo">
+        SELECT a.id,a.name,b.pic from course_base a LEFT JOIN course_pic b ON a.id=b.courseid
+    </select>
 </mapper>

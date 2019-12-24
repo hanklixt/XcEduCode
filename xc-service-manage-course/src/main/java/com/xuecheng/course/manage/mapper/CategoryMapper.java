@@ -1,11 +1,12 @@
 package com.xuecheng.course.manage.mapper;
 
-import com.xuecheng.course.manage.entity.Category;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.xuecheng.course.manage.entity.Category;
+import com.xuecheng.course.manage.outVo.CategoryNode;
 
 /**
  * <p>
- *  Mapper 接口
+ * Mapper 接口
  * </p>
  *
  * @author lxt
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface CategoryMapper extends BaseMapper<Category> {
 
+    CategoryNode getCateGoryList();
 }

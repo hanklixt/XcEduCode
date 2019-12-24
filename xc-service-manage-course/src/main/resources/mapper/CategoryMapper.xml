@@ -2,4 +2,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.xuecheng.course.manage.mapper.CategoryMapper">
 
+    <resultMap id="categoryMap" type="com.xuecheng.course.manage.outVo.CategoryNode">
+        <id column="one_id" property="value"/>
+        <result column="one_label" property="label"/>
+        <collection property="children" ofType="com.xuecheng.course.manage.outVo.CategoryNode">
+            <id column="two_id" property="value"/>
+            <result column="two_label" property="label"/>
+            <collection property="children" ofType="com.xuecheng.course.manage.outVo.CategoryNode">
+                <id column="three_id" property="value"/>
+                <result column="three_label" property="label"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="getCateGoryList" resultMap="categoryMap">
+        SELECT a.id as one_id,a.label as one_label,b.id as two_id,b.label as two_label,c.id as three_id,c.label as three_label from category a LEFT JOIN category b ON a.id=b.parentid LEFT JOIN category c ON b.id=c.parentid
+        WHERE a.id='1'
+    </select>
 </mapper>

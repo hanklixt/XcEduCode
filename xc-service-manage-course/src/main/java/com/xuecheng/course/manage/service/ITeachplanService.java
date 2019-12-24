@@ -32,5 +32,10 @@ public interface ITeachplanService extends IService<Teachplan> {
      */
     List<Teachplan> findByCourseIdAndParentId(String courseId, String parentId);
 
+    /**
+     * 添加课程计划
+     *
+     * @param teachplan
+     */
     void addTeachPlan(Teachplan teachplan);
 }
